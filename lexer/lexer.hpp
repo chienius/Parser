@@ -15,7 +15,7 @@ typedef struct {
     // TODO Complete the definition.
 } Lconst;
 
-enum SYMBOL {
+enum Symbol {
     $INT=1, $VOID=2, $IF=3, $ELSE=4, $WHILE=5, $RETURN=6,
     $ID=7, $NUM=8, $ASSIGN=9, $PLUS=10, $MIN=11, $STAR=12, $SLASH=13,
     $EQUAL=14, $GT=15, $GE=16, $LT=17, $LE=18, $NEQUAL=19, $SEMICOLON=20,
@@ -24,8 +24,11 @@ enum SYMBOL {
 };
 
 typedef struct {
-    SYMBOL symbol;
+    Symbol symbol;
     string token;
+    // TODO Implement Const and Id table cursors.
+    //Lconst* lconst;
+    //Identifier* identifier;
 } Word;
 
 
@@ -36,16 +39,17 @@ typedef std::map<int, string> SymbolMap;
  * Lexer
  */
 class Lexer {
-    private:
-        //static const string reservedWords[6];
+    protected:
         void initializeSymbolList();
         SymbolMap symbolList;
 
         vector<Identifier> identifiers;
         vector<Lconst> consts;
+        vector<Word> wordList; // <- Results are here
+
+    private:
         string token; // String Buffer
         char token_char; // Reading char
-        vector<Word> wordList; // <- Results are here
 
         void skipSpaces();
         bool isDigit();
@@ -59,7 +63,7 @@ class Lexer {
         string::iterator input_it;
         bool readCh();
         void concatCh();
-        void insertWord(SYMBOL symbol);
+        void insertWord(Symbol symbol);
 
         int mainControl();
         int commentControl();
@@ -69,6 +73,4 @@ class Lexer {
         void analyze(string input);
         void printResult();
 };
-
-//const string Lexer::reservedWords[6] = {"int", "void", "if", "else", "while", "return"};
 

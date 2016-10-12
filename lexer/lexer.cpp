@@ -92,7 +92,7 @@ void Lexer::insertConst(string token) {
     consts.push_back(lconst);
 }
 
-void Lexer::insertWord(SYMBOL symbol) {
+void Lexer::insertWord(Symbol symbol) {
     Word word = {symbol, token};
     wordList.push_back(word);
     token = "";
@@ -129,7 +129,7 @@ int Lexer::mainControl() {
             insertId(token);
             insertWord($ID);
         }else {
-            insertWord((SYMBOL)symbol);
+            insertWord((Symbol)symbol);
         }
     } else if(isDigit()) {
         concatCh();
