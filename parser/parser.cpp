@@ -1,4 +1,35 @@
 #include "./parser.hpp"
+#include <iostream>
+
+void Parser::initializeNTSymbolList() {
+    ntSymbolList[$Program] = "$Program";
+    ntSymbolList[$DeclBlock] = "$DeclBlock";
+    ntSymbolList[$Declaration] = "$Declaration";
+    ntSymbolList[$DeclType] = "$DeclType";
+    ntSymbolList[$DeclVar] = "$DeclVar";
+    ntSymbolList[$DeclFunc] = "$DeclFunc";
+    ntSymbolList[$FparaBlock] = "$FparaBlock";
+    ntSymbolList[$FpapraList] = "$FpapraList";
+    ntSymbolList[$Fparameter] = "$Fparameter";
+    ntSymbolList[$StatBlock] = "$StatBlock";
+    ntSymbolList[$InnerDeclar] = "$InnerDeclar";
+    ntSymbolList[$InnerDeclVar] = "$InnerDeclVar";
+    ntSymbolList[$StatString] = "$StatString";
+    ntSymbolList[$Statement] = "$Statement";
+    ntSymbolList[$StatIf] = "$StatIf";
+    ntSymbolList[$StatWhile] = "$StatWhile";
+    ntSymbolList[$StatReturn] = "$StatReturn";
+    ntSymbolList[$StatAssign] = "$StatAssign";
+    ntSymbolList[$Expression] = "$Expression";
+    ntSymbolList[$ExprArith] = "$ExprArith";
+    ntSymbolList[$Item] = "$Item";
+    ntSymbolList[$Factor] = "$Factor";
+    ntSymbolList[$Ftype] = "$Ftype";
+    ntSymbolList[$Call] = "$Call";
+    ntSymbolList[$Aparameter] = "$Aparameter";
+    ntSymbolList[$AparaList] = "$AparaList";
+    ntSymbolList[$TerminalSymbol] = "$TerminalSymbol";
+}
 
 void Parser::advance() {
     while (true) {
@@ -547,9 +578,40 @@ int Parser::_aparaList(TreeNode *parent) {
 void Parser::analyze(string input) {
     Lexer::analyze(input);
 
+    initializeNTSymbolList();
     TreeNode newTree;
+    newTree.nt_symbol = $Program;
     synTree = newTree;
 
     word_it = Lexer::wordList.begin();
     word = *word_it;
+
+    if(!Parser::_program(&newTree)){
+        //throw runtime_error("Syntax error detected.");
+    };
+}
+
+void Parser::printResult() {
+    Lexer::printResult();
+    vector<NodeElem> nodeQueue;
+    NodeElem root = {synTree, 0};
+    nodeQueue.push_back(root);
+
+    while(nodeQueue.size()) {
+        NodeElem e = nodeQueue.back();
+        nodeQueue.pop_back();
+        for(int i=0; i<e.d; i++) {
+            cout << "\t";
+        }
+        if(e.n.nt_symbol != $TerminalSymbol) {
+            cout << ntSymbolList[e.n.nt_symbol];
+        } else {
+            cout << Lexer::symbolList[e.n.t_symbol];
+        }
+        cout << endl;
+        for(vector<TreeNode>::reverse_iterator it = e.n.children.rbegin(); it!=e.n.children.rend(); ++it) {
+            NodeElem ne = {*it, e.d+1};
+            nodeQueue.push_back(ne);
+        }
+    }
 }

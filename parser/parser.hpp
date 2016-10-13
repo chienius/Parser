@@ -7,12 +7,18 @@ enum NTSymbol {
     $Ftype, $Call, $Aparameter, $AparaList, $TerminalSymbol
 };
 
+typedef map<NTSymbol, string> NTSymbolMap;
+
 typedef struct TreeNode {
     vector<TreeNode> children;
     NTSymbol nt_symbol; //Non-terminal symbol type
     Symbol t_symbol; //Terminal symbol type
 } TreeNode;
 
+typedef struct NodeElem {
+    TreeNode n;
+    int d;  //depth
+} NodeElem;
 
 /**
  * Parser
@@ -20,7 +26,10 @@ typedef struct TreeNode {
 class Parser : protected Lexer {
     protected:
         TreeNode synTree; // Syntactical Tree
+        NTSymbolMap ntSymbolList;
+        void initializeNTSymbolList();
 
+    private:
         /**
          * Automation Recursive Functions
          * @return 1 - Success; 0 - Error;

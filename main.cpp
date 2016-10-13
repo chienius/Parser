@@ -1,16 +1,16 @@
-#include "lexer/lexer.hpp"
+#include "parser/parser.hpp"
 #include <iostream>
 
 int main(int argc, char *argv[])
 {
-    Lexer lexer;
+    Parser parser;
     string input_string;
     string line;
     while(getline(cin, line)) {
         input_string += line + '\n';
     }
     cout << input_string << endl;
-    lexer.analyze(input_string);
-    lexer.printResult();
+    parser.analyze(input_string);
+    parser.printResult();
     return 0;
 }
