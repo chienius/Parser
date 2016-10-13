@@ -8,7 +8,6 @@ enum NTSymbol {
 };
 
 typedef struct TreeNode {
-    TreeNode *parent;
     vector<TreeNode> children;
     NTSymbol nt_symbol; //Non-terminal symbol type
     Symbol t_symbol; //Terminal symbol type

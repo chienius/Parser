@@ -1,9 +1,10 @@
-int main() {
-    int a = 5;
-    return 0;
-    if( a<= 3 ) {
-        return 1;
-    }
+int main(int argc) {
     // dfa//dsfadf
+    int a = 5;
+    if( a<= 3 + 2*6 ) {
+        return test(a);
+    } else {
+        return 0;
+    }
     /* dfad/*f */
 }#
