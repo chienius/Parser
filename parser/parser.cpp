@@ -1,6 +1,10 @@
 #include "./parser.hpp"
 #include <iostream>
 
+// #define DEBUG_PRINT(x) cout << "ERROR syntax in " << x << endl;
+
+#define DEBUG_PRINT(x) ;
+
 void Parser::initializeNTSymbolList() {
     ntSymbolList[$Program] = "$Program";
     ntSymbolList[$DeclBlock] = "$DeclBlock";
@@ -37,7 +41,7 @@ void Parser::advance() {
         if(word_it == wordList.end()) {
             throw runtime_error("End of word list in parsing.");
         }
-        if(word.symbol == $LCMT || word.symbol == $RCMT || word.symbol == $CMT) {
+        if(word_it->symbol == $LCMT || word_it->symbol == $RCMT || word_it->symbol == $CMT) {
             continue;
         } else {
             break;
@@ -64,8 +68,12 @@ void Parser::insertNode(TreeNode* parent, TreeNode child) {
 
 int Parser::_program(TreeNode* parent) {
     TreeNode child = createNode($DeclBlock);
-    if(_declBlock(&child)) insertNode(parent, child);
-    else return 0;
+    if(_declBlock(&child))  {
+        insertNode(parent, child);
+    } else {
+        return 0;
+        DEBUG_PRINT("_program");
+    }
     return 1;
 }
 
@@ -80,6 +88,7 @@ int Parser::_declBlock(TreeNode* parent) {
             } else break;
         }
     } else {
+        DEBUG_PRINT("_declBlock");
         return 0;
     }
     return 1;
@@ -96,9 +105,11 @@ int Parser::_declaration(TreeNode* parent) {
             if(_declType(&child)) {
                 insertNode(parent, child);
             } else{
+                DEBUG_PRINT("_declaration");
                 return 0;
             }
         } else {
+            DEBUG_PRINT("_declaration");
             return 0;
         }
     } else if(word.symbol == $VOID) {
@@ -111,12 +122,15 @@ int Parser::_declaration(TreeNode* parent) {
             if(_declFunc(&child)) {
                 insertNode(parent, child);
             } else {
+                DEBUG_PRINT("_declaration");
                 return 0;
             }
         } else {
+            DEBUG_PRINT("_declaration");
             return 0;
         }
     } else {
+        DEBUG_PRINT("_declaration");
         return 0;
     }
     return 1;
@@ -128,7 +142,10 @@ int Parser::_declType(TreeNode* parent) {
     else {
         TreeNode child = createNode($DeclFunc);
         if(_declFunc(&child)) insertNode(parent, child);
-        else return 0;
+        else {
+            DEBUG_PRINT("_declType");
+            return 0;
+        }
     }
     return 1;
 }
@@ -138,6 +155,7 @@ int Parser::_declVar(TreeNode* parent) {
         advance();
         INSERT_TERM_SYMBOL($SEMICOLON);
     } else {
+        DEBUG_PRINT("_declVar");
         return 0;
     }
     return 1;
@@ -161,16 +179,20 @@ int Parser::_declFunc(TreeNode* parent) {
             }
         }
     }
+    DEBUG_PRINT("_declFunc");
     return 0;
 }
 
 int Parser::_fparaBlock(TreeNode *parent) {
     TreeNode child = createNode($FpapraList);
     vector<Word>::iterator t_it = word_it;
-    if(_fparaList(&child)) {
+    if(word.symbol == $VOID) {
+        INSERT_TERM_SYMBOL($VOID);
+        advance();
+    } else if(_fparaList(&child)) {
         insertNode(parent, child);
     } else {
-        retrack(t_it);
+        return 0;
     }
     return 1;
 }
@@ -186,11 +208,13 @@ int Parser::_fparaList(TreeNode *parent) {
             if(_fparameter(&child)) {
                 insertNode(parent, child);
             } else {
+                DEBUG_PRINT("_fparaList");
                 return 0;
             }
         }
         return 1;
     } else {
+        DEBUG_PRINT("_fparaList");
         return 0;
     }
 }
@@ -205,6 +229,7 @@ int Parser::_fparameter(TreeNode *parent) {
             return 1;
         }
     }
+    DEBUG_PRINT("_fparameter");
     return 0;
 }
 
@@ -226,6 +251,7 @@ int Parser::_statBlock(TreeNode *parent) {
             }
         }
     }
+    DEBUG_PRINT("_statBlock");
     return 0;
 }
 
@@ -238,21 +264,20 @@ int Parser::_innerDeclar(TreeNode *parent) {
             INSERT_TERM_SYMBOL($SEMICOLON);
             advance();
             TreeNode child = createNode($InnerDeclar);
+            vector<Word>::iterator t_it = word_it;
             if(_innerDeclVar(&child)) {
                 insertNode(parent, child);
             } else {
-                return 0;
+                retrack(t_it);
+                break;
             }
         }
-        if(word.symbol == $SEMICOLON) {
-            advance();
-            INSERT_TERM_SYMBOL($SEMICOLON);
-            return 1;
-        }
+        return 1;
     } else {
         retrack(t_it);
         return 1;
     }
+    DEBUG_PRINT("_innerDeclar");
     return 0;
 }
 
@@ -266,6 +291,7 @@ int Parser::_innerDeclVar(TreeNode *parent) {
             return 1;
         }
     }
+    DEBUG_PRINT("_innerDeclVar");
     return 0;
 }
 
@@ -302,6 +328,7 @@ int Parser::_statement(TreeNode *parent){
                 if(_statAssign(&child)) {
                     insertNode(parent, child);
                 } else {
+                    DEBUG_PRINT("_statement");
                     return 0;
                 }
             }
@@ -320,10 +347,15 @@ int Parser::_statAssign(TreeNode *parent) {
             TreeNode child = createNode($Expression);
             if(_expression(&child)) {
                 insertNode(parent, child);
-                return 1;
+                if(word.symbol == $SEMICOLON) {
+                    INSERT_TERM_SYMBOL($SEMICOLON);
+                    advance();
+                    return 1;
+                }
             }
         }
     }
+    DEBUG_PRINT("_statAssign");
     return 0;
 }
 
@@ -342,6 +374,7 @@ int Parser::_statReturn(TreeNode *parent) {
             return 1;
         }
     }
+    DEBUG_PRINT("_statReturn");
     return 0;
 }
 
@@ -367,6 +400,7 @@ int Parser::_statWhile(TreeNode *parent) {
             }
         }
     }
+    DEBUG_PRINT("_statWhile");
     return 0;
 }
 
@@ -393,6 +427,7 @@ int Parser::_statIf(TreeNode *parent) {
                             if(_statBlock(&child)) {
                                 insertNode(parent, child);
                             } else {
+                                DEBUG_PRINT("_statIf");
                                 return 0;
                             }
                         }
@@ -402,6 +437,7 @@ int Parser::_statIf(TreeNode *parent) {
             }
         }
     }
+    DEBUG_PRINT("_statIf");
     return 0;
 }
 
@@ -430,11 +466,13 @@ int Parser::_expression(TreeNode *parent) {
             if(_exprArith(&child)) {
                 insertNode(parent, child);
             } else {
+                DEBUG_PRINT("_expression");
                 return 0;
             }
         }
         return 1;
     }
+    DEBUG_PRINT("_expression");
     return 0;
 }
 
@@ -455,11 +493,13 @@ int Parser::_exprArith(TreeNode* parent) {
             if(_item(&child)) {
                 insertNode(parent, child);
             } else {
+                DEBUG_PRINT("_exprArith");
                 return 0;
             }
         }
         return 1;
     }
+    DEBUG_PRINT("_exprArith");
     return 0;
 }
 
@@ -480,11 +520,13 @@ int Parser::_item(TreeNode* parent) {
             if(_factor(&child)) {
                 insertNode(parent, child);
             } else {
+                DEBUG_PRINT("_item");
                 return 0;
             }
         }
         return 1;
     }
+    DEBUG_PRINT("_item");
     return 0;
 }
 
@@ -514,6 +556,7 @@ int Parser::_factor(TreeNode* parent) {
             return 1;
         }
     }
+    DEBUG_PRINT("_factor");
     return 0;
 }
 
@@ -542,6 +585,7 @@ int Parser::_call(TreeNode *parent) {
             }
         }
     }
+    DEBUG_PRINT("_call");
     return 0;
 }
 
@@ -567,11 +611,13 @@ int Parser::_aparaList(TreeNode *parent) {
             if(_expression(&child)) {
                 insertNode(parent, child);
             } else {
+                DEBUG_PRINT("_aparaList");
                 return 0;
             }
         }
         return 1;
     }
+    DEBUG_PRINT("_aparaList");
     return 0;
 }
 
@@ -585,9 +631,14 @@ void Parser::analyze(string input) {
 
     word_it = Lexer::wordList.begin();
     word = *word_it;
+    while(word.symbol == $LCMT || word.symbol == $RCMT || word.symbol == $CMT) {
+        word_it ++;
+        word = *word_it;
+    }
 
-    if(!Parser::_program(&newTree)){
-        //throw runtime_error("Syntax error detected.");
+    if(!Parser::_program(&synTree)){
+        cout << word.token << endl;
+        throw runtime_error("Syntax error detected.");
     };
 }
 
