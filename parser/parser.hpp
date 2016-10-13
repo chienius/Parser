@@ -13,6 +13,7 @@ typedef struct TreeNode {
     vector<TreeNode> children;
     NTSymbol nt_symbol; //Non-terminal symbol type
     Symbol t_symbol; //Terminal symbol type
+    string token;
 } TreeNode;
 
 typedef struct NodeElem {
@@ -65,11 +66,11 @@ class Parser : protected Lexer {
         void retrack(vector<Word>::iterator it);
         Word word; // Current definite symbol
         vector<Word>::iterator word_it;
-        TreeNode createNode(NTSymbol nt_symbol, Symbol t_symbol = (Symbol)0);
+        TreeNode createNode(NTSymbol nt_symbol, Symbol t_symbol = (Symbol)0, string token="");
         void insertNode(TreeNode* parent, TreeNode child);
     public:
         void analyze(string input);
         void printResult();
 };
 
-#define INSERT_TERM_SYMBOL(x)  insertNode(parent, createNode($TerminalSymbol, x))
+#define INSERT_TERM_SYMBOL(x)  insertNode(parent, createNode($TerminalSymbol, x, word.token))

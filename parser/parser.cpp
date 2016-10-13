@@ -55,10 +55,11 @@ void Parser::retrack(vector<Word>::iterator it) {
     word = *word_it;
 }
 
-TreeNode Parser::createNode(NTSymbol nt_symbol, Symbol t_symbol) {
+TreeNode Parser::createNode(NTSymbol nt_symbol, Symbol t_symbol, string token) {
     TreeNode new_node;
     new_node.nt_symbol = nt_symbol;
     new_node.t_symbol = t_symbol;
+    new_node.token = token;
     return new_node;
 }
 
@@ -657,7 +658,7 @@ void Parser::printResult() {
         if(e.n.nt_symbol != $TerminalSymbol) {
             cout << ntSymbolList[e.n.nt_symbol];
         } else {
-            cout << Lexer::symbolList[e.n.t_symbol];
+            cout << Lexer::symbolList[e.n.t_symbol] << " - " << e.n.token;
         }
         cout << endl;
         for(vector<TreeNode>::reverse_iterator it = e.n.children.rbegin(); it!=e.n.children.rend(); ++it) {
