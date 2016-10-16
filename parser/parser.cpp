@@ -1,5 +1,5 @@
-#include "./parser.hpp"
 #include <iostream>
+#include "./parser.hpp"
 
 // #define DEBUG_PRINT(x) cout << "ERROR syntax in " << x << endl;
 
@@ -639,31 +639,56 @@ void Parser::analyze(string input) {
 
     if(!Parser::_program(&synTree)){
         cout << word.token << endl;
-        throw runtime_error("Syntax error detected.");
+        //throw runtime_error("Syntax error detected.");
     };
 }
 
-void Parser::printResult() {
-    Lexer::printResult();
-    vector<NodeElem> nodeQueue;
-    NodeElem root = {synTree, 0};
-    nodeQueue.push_back(root);
-
-    while(nodeQueue.size()) {
-        NodeElem e = nodeQueue.back();
-        nodeQueue.pop_back();
-        for(int i=0; i<e.d; i++) {
-            cout << "\t";
+void Parser::dfsResult(boost::property_tree::ptree* pt, TreeNode n) {
+    using namespace boost::property_tree;
+    ptree children;
+    if(n.children.size()) {
+        for(vector<TreeNode>::reverse_iterator it = n.children.rbegin(); it!=n.children.rend(); ++it) {
+            ptree ptNode;
+            if(n.nt_symbol != $TerminalSymbol) {
+                ptNode.put("is_terminal", 0);
+                ptNode.put("symbol", it->nt_symbol);
+                ptNode.put("symbol_title", ntSymbolList[it->nt_symbol]);
+            } else {
+                ptNode.put("is_terminal", 1);
+                ptNode.put("symbol", it->t_symbol);
+                ptNode.put("symbol_title", Lexer::symbolList[it->t_symbol]);
+                ptNode.put("token", it->token);
+            }
+            dfsResult(&ptNode, *it);
+            children.push_back(std::make_pair("", ptNode));
         }
-        if(e.n.nt_symbol != $TerminalSymbol) {
-            cout << ntSymbolList[e.n.nt_symbol];
-        } else {
-            cout << Lexer::symbolList[e.n.t_symbol] << " - " << e.n.token;
-        }
-        cout << endl;
-        for(vector<TreeNode>::reverse_iterator it = e.n.children.rbegin(); it!=e.n.children.rend(); ++it) {
-            NodeElem ne = {*it, e.d+1};
-            nodeQueue.push_back(ne);
-        }
+        pt->add_child("children", children);
+    } else {
+        return;
     }
+
+}
+
+boost::property_tree::ptree Parser::generateResult() {
+    using namespace boost::property_tree;
+
+    ptree pt;
+    ptree children;
+
+    children.put("is_terminal", 0);
+    children.put("symbol", synTree.nt_symbol);
+    children.put("symbol_title", ntSymbolList[synTree.nt_symbol]);
+    dfsResult(&children, synTree);
+    pt.add_child("results", children);
+
+    return pt;
+}
+
+void Parser::printResult() {
+    using namespace boost::property_tree;
+    ptree pt = generateResult();
+    std::stringstream ss_out;
+    write_json(ss_out, pt);
+    std::string str_out =  ss_out.str();
+    std::cout << str_out << endl;
 }

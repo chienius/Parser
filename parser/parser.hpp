@@ -16,11 +16,6 @@ typedef struct TreeNode {
     string token;
 } TreeNode;
 
-typedef struct NodeElem {
-    TreeNode n;
-    int d;  //depth
-} NodeElem;
-
 /**
  * Parser
  */
@@ -68,8 +63,11 @@ class Parser : protected Lexer {
         vector<Word>::iterator word_it;
         TreeNode createNode(NTSymbol nt_symbol, Symbol t_symbol = (Symbol)0, string token="");
         void insertNode(TreeNode* parent, TreeNode child);
+
+        void dfsResult(boost::property_tree::ptree* pt, TreeNode n);
     public:
         void analyze(string input);
+        boost::property_tree::ptree generateResult();
         void printResult();
 };
 

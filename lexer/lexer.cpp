@@ -305,8 +305,26 @@ void Lexer::analyze(string instr) {
     }
 }
 
-void Lexer::printResult() {
-    for(vector<Word>::iterator it=wordList.begin(); it!=wordList.end(); ++it) {
-        cout << "(" << it->symbol << ", " << symbolList[it->symbol] << ", " << it->token << ")" << endl;
+boost::property_tree::ptree Lexer::generateResult() {
+    using namespace boost::property_tree;
+    ptree pt;
+    ptree children;
+    for(std::vector<Word>::iterator it=wordList.begin(); it!=wordList.end(); ++it) {
+        ptree word_tree;
+        word_tree.put("symbol", it->symbol);
+        word_tree.put("symbol_title", symbolList[it->symbol]);
+        word_tree.put("token", it->token);
+        children.push_back(std::make_pair("", word_tree));
     }
+    pt.add_child("results", children);
+    return pt;
+}
+
+void Lexer::printResult() {
+    using namespace boost::property_tree;
+    ptree pt = generateResult();
+    std::stringstream ss_out;
+    write_json(ss_out, pt);
+    std::string str_out =  ss_out.str();
+    std::cout << str_out << endl;
 }

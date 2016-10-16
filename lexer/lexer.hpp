@@ -2,6 +2,8 @@
 #include <vector>
 #include <map>
 #include <exception>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 using namespace std;
 
 typedef struct {
@@ -71,6 +73,7 @@ class Lexer {
 
     public:
         void analyze(string input);
+        boost::property_tree::ptree generateResult();
         void printResult();
 };
 

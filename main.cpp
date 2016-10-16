@@ -3,14 +3,30 @@
 
 int main(int argc, char *argv[])
 {
-    Parser parser;
     string input_string;
     string line;
     while(getline(cin, line)) {
         input_string += line + '\n';
     }
-    cout << input_string << endl;
-    parser.analyze(input_string);
-    parser.printResult();
+
+    string s = string(argv[1]);
+    if(s == "lexer") {
+        Lexer lexer;
+        try {
+            lexer.analyze(input_string);
+            lexer.printResult();
+        } catch(exception& e) {
+            cout << "0" << endl;
+        }
+    }else if(s == "parser") {
+        Parser parser;
+        try {
+            parser.analyze(input_string);
+            parser.printResult();
+        } catch(exception& e) {
+            cout << "0" << endl;
+        }
+    }
+
     return 0;
 }

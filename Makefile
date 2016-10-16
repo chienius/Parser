@@ -13,4 +13,5 @@ clean:
 	rm -rf main lexer.o parser.o
 
 test: main
-	main <test.a
+	main lexer <test.a
+	main parser <test.a
