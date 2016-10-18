@@ -647,9 +647,9 @@ void Parser::dfsResult(boost::property_tree::ptree* pt, TreeNode n) {
     using namespace boost::property_tree;
     ptree children;
     if(n.children.size()) {
-        for(vector<TreeNode>::reverse_iterator it = n.children.rbegin(); it!=n.children.rend(); ++it) {
+        for(vector<TreeNode>::iterator it = n.children.begin(); it!=n.children.end(); ++it) {
             ptree ptNode;
-            if(n.nt_symbol != $TerminalSymbol) {
+            if(it->nt_symbol != $TerminalSymbol) {
                 ptNode.put("is_terminal", 0);
                 ptNode.put("symbol", it->nt_symbol);
                 ptNode.put("symbol_title", ntSymbolList[it->nt_symbol]);
